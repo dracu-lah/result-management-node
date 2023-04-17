@@ -137,7 +137,9 @@ async function run() {
 
       res.send(finalData);
     });
-
+    app.get("/",(req,res)=>{
+      res.send("Post Page for the api (go to /api/results for getting the data)")
+    })
     app.listen(port, () => console.log(`Server started on port ${port}`));
   } catch (e) {
     console.error("Error connecting to MongoDB", e);
