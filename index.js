@@ -2,7 +2,7 @@ require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors=require("cors")
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
@@ -114,10 +114,14 @@ async function run() {
     });
 
     // Student results are displayed
-    app.get("/", (req, res) => {
+    app.get("/api/results", async (req, res) => {
+      await client.connect();
+      const database = client.db("result_management");
+      const results = await students_collection.find().toArray();
+
       const finalData = [];
 
-      student_results.map((std) => {
+      results.map((std) => {
         // code to find cgpa
         const semesters = std.semesters;
         const numSemesters = semesters.length;
