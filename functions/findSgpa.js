@@ -6,7 +6,6 @@ const client = require("../utils/MongoClientConnection");
 async function findSgpa(students) {
   try {
     await client.connect();
-    console.log("Connected to MongoDB in findSgpa");
     const database = client.db("result_management");
     const credits_collection = database.collection("credits_data");
 
@@ -36,7 +35,7 @@ async function findSgpa(students) {
       await studentDatatoDB(student);
     }
   } catch (e) {
-    console.error("Error in getFinalData: ", e);
+    console.error("*** Error in findSgpa.js ***: ", e);
   } finally { 
     await client.close();
   }

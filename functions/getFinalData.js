@@ -24,7 +24,7 @@ async function getFinalData() {
     });
     return [finalData];
   } catch (e) {
-    console.error("Error in getFinalData: ", e);
+    console.error("*** Error in getFinalData ***: ", e);
   } finally {
     await client.close();
   }
