@@ -127,7 +127,7 @@ async function run() {
     });
 
     // Student results are displayed
-    const hello = async () => {
+    const getFinalData = async () => {
       await client.connect();
       const database = client.db("result_management");
       const results = await students_collection.find().toArray();
@@ -151,7 +151,7 @@ async function run() {
     };
     app.get("/api/results", async (req, res) => {
       // destructure final data
-      const [finalData] = await hello();
+      const [finalData] = await getFinalData();
       res.send(finalData);
     });
     app.get("/", (req, res) => {
