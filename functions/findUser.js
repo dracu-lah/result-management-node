@@ -1,4 +1,5 @@
 const client = require("../utils/MongoClientConnection");
+const jwt = require("jsonwebtoken");
 
 async function findUser(req, res, username, password) {
   try {
@@ -12,7 +13,11 @@ async function findUser(req, res, username, password) {
     if (existingUser.length === 0) {
       res.status(404).json({ error: "User not found" });
     } else {
-      res.json(existingUser[0]);
+      const token = jwt.sign(
+        { username: existingUser[0].username },
+        "secret_key"
+      );
+      res.json({ user: existingUser[0], token });
     }
   } catch (e) {
     console.error("*** Error in findUser ***", e);
