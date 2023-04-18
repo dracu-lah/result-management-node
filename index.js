@@ -2,9 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const getFinalData = require("./functions/getFinalData");
 const findSgpa = require("./functions/findSgpa");
-
+const addCgpaToDB = require("./functions/addCgpaToDB");
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -15,16 +14,13 @@ app.post("/", (req, res) => {
   const studentsData = req.body;
   // calls findSgpa function
   findSgpa(studentsData);
-
   res.send("Post sucessfully");
 });
 
 app.get("/api/results", async (req, res) => {
   // destructure final data
 
-  const [finalData] = await getFinalData();
-
-  res.send(finalData);
+  res.send(await addCgpaToDB());
 });
 app.get("/", (req, res) => {
   res.send("Post Page for the api (go to /api/results for getting the data)");
