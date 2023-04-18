@@ -4,9 +4,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const findSgpa = require("./functions/findSgpa");
 const addCgpaToDB = require("./functions/addCgpaToDB");
+const findUser = require("./functions/findUser");
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json());
 const port = process.env.PORT;
 
 app.post("/", (req, res) => {
@@ -15,6 +17,11 @@ app.post("/", (req, res) => {
   // calls findSgpa function
   findSgpa(studentsData);
   res.send("Post sucessfully");
+});
+
+app.post("/auth/users/", (req, res) => {
+  const { username, password } = req.body;
+  findUser(req, res, username, password);
 });
 
 app.get("/api/results", async (req, res) => {
