@@ -1,4 +1,3 @@
-require("dotenv").config();
 const client = require("../utils/MongoClientConnection");
 
 // this function is used to store the student data to database
@@ -8,7 +7,6 @@ async function studentDatatoDB({ registerNumber, courses, semester, sgpa }) {
     const database = client.db("result_management");
     const students_collection = database.collection("student_results");
     console.log("Connected to database for  sem push / set");
-    // 
     
     // checks from db if semester exists or not
     const existingSemester = await students_collection
@@ -60,7 +58,8 @@ async function studentDatatoDB({ registerNumber, courses, semester, sgpa }) {
     }
   } catch (e) {
     console.error("*** Error in StudentDatatoDB ***", e);
-  } finally {
+  } 
+  finally {
     await client.close();
   }
 }
