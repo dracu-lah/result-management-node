@@ -27,12 +27,17 @@ async function run() {
     const credits = await credits_collection.find().toArray();
     const students_collection = database.collection("student_results");
     const student_results = await students_collection.find().toArray();
-
-    async function hello({ registerNumber, courses, semester, sgpa }) {
+    // this function is used to store the student data to database
+    async function studentDatatoDB({
+      registerNumber,
+      courses,
+      semester,
+      sgpa,
+    }) {
       try {
         await client.connect();
 
-        console.log("connected for sem push/set");
+        console.log("Connected to database for  sem push / set");
         // checks from db if semester exists or not
         const existingSemester = await students_collection
           .find({
@@ -40,44 +45,45 @@ async function run() {
             registerNumber: registerNumber,
           })
           .toArray();
-        const updateObj = {
-          $set: {
-            "semesters.$[semester].sgpa": sgpa,
-            "semesters.$[semester].courses": courses,
-          },
-        };
-
-        const arrayFilter = { "semester.semester": semester };
-
         if (existingSemester.length === 0) {
-          // if the semester doesn't exists push it to the semesters array
-          console.log("semester doesn't exist");
+          // If the semester doesn't exist, push it to the semesters array
+          console.log("Semester doesn't exist");
+
+          const semesterObj = {
+            semester: semester,
+            courses: courses,
+            sgpa: sgpa,
+          };
+
+          const pushObj = {
+            $push: {
+              semesters: semesterObj,
+            },
+          };
 
           await students_collection.updateOne(
             { registerNumber: registerNumber },
-            {
-              $push: {
-                semesters: { semester: semester, courses: courses, sgpa: sgpa },
-              },
-            },
-            function (err, result) {
-              if (err) throw err;
-              console.log(result);
-              client.close();
-            }
+            pushObj
           );
         } else {
-          // if the semester exists update the results in the semester
-          console.log("semester exists");
+          // If the semester exists, update the results in the semester
+          console.log("Semester exists");
+
+          const updateObj = {
+            $set: {
+              "semesters.$[semester].sgpa": sgpa,
+              "semesters.$[semester].courses": courses,
+            },
+          };
+
+          const arrayFilter = {
+            arrayFilters: [{ "semester.semester": semester }],
+          };
+
           await students_collection.updateOne(
             { registerNumber: registerNumber },
             updateObj,
-            { arrayFilters: [arrayFilter] },
-            function (err, result) {
-              if (err) throw err;
-              console.log(result);
-              client.close();
-            }
+            arrayFilter
           );
         }
       } catch (e) {
@@ -85,9 +91,8 @@ async function run() {
       }
     }
 
-    app.post("/", async (req, res) => {
-      const students = req.body;
-      //   get post data of a student from students data
+    // this findSgpa functino is used to find the sgpa of a student
+    function findSgpa(students) {
       for (const student of students) {
         let totalCreditPoints = 0;
         let totalGradePoints = 0;
@@ -108,13 +113,21 @@ async function run() {
           (totalGradePoints / totalCreditPoints).toFixed(2)
         );
         student["sgpa"] = sgpa;
-        hello(student);
+        // calls studentDatatoDB function
+        studentDatatoDB(student);
       }
+    }
+    app.post("/", async (req, res) => {
+      //   get post data of a student from students data
+      const studentsData = req.body;
+      // calls findSgpa function
+      findSgpa(studentsData);
+
       res.send("Post sucessfully");
     });
 
     // Student results are displayed
-    app.get("/api/results", async (req, res) => {
+    const hello = async () => {
       await client.connect();
       const database = client.db("result_management");
       const results = await students_collection.find().toArray();
@@ -134,12 +147,18 @@ async function run() {
         let cgpa = (sumSGPA / numSemesters).toFixed(2);
         finalData.push({ ...std, cgpa: cgpa });
       });
-
+      return [finalData];
+    };
+    app.get("/api/results", async (req, res) => {
+      // destructure final data
+      const [finalData] = await hello();
       res.send(finalData);
     });
-    app.get("/",(req,res)=>{
-      res.send("Post Page for the api (go to /api/results for getting the data)")
-    })
+    app.get("/", (req, res) => {
+      res.send(
+        "Post Page for the api (go to /api/results for getting the data)"
+      );
+    });
     app.listen(port, () => console.log(`Server started on port ${port}`));
   } catch (e) {
     console.error("Error connecting to MongoDB", e);
