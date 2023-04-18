@@ -8,6 +8,8 @@ async function studentDatatoDB({ registerNumber, courses, semester, sgpa }) {
     const database = client.db("result_management");
     const students_collection = database.collection("student_results");
     console.log("Connected to database for  sem push / set");
+    // 
+    
     // checks from db if semester exists or not
     const existingSemester = await students_collection
       .find({

@@ -22,7 +22,7 @@ async function getFinalData() {
       let cgpa = (sumSGPA / numSemesters).toFixed(2);
       finalData.push({ ...std, cgpa: cgpa });
     });
-    return [finalData];
+    return results;
   } catch (e) {
     console.error("*** Error in getFinalData ***: ", e);
   } finally {

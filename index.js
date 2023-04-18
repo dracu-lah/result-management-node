@@ -22,9 +22,8 @@ app.post("/", (req, res) => {
 app.get("/api/results", async (req, res) => {
   // destructure final data
 
-  const [finalData] = await getFinalData();
 
-  res.send(finalData);
+  res.send(await getFinalData());
 });
 app.get("/", (req, res) => {
   res.send("Post Page for the api (go to /api/results for getting the data)");
