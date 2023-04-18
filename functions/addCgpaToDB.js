@@ -24,9 +24,9 @@ async function addCgpaToDB() {
         { $set: { cgpa: cgpa } }
       );
     }
+
+    
     // adding aggregation to fix the ordering of semesters ;]
-
-
     await students_collection
       .aggregate([
         { $unwind: "$semesters" },
