@@ -13,7 +13,7 @@ const port = process.env.PORT;
 
 app.post("/", (req, res) => {
   //   get post data of a student from students data
-  const studentsData = req.body;
+  const studentsData = req.body.result;
   // calls findSgpa function
   findSgpa(studentsData);
   res.send("Post sucessfully");
