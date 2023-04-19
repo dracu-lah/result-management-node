@@ -8,6 +8,11 @@ async function addCgpaToDB() {
 
     const results = await students_collection.find().toArray();
     for (const result of results) {
+      // check if there are semesters in the database
+      if (!result.semesters || result.semesters.length === 0) {
+        continue; // skip this student if there are no semesters
+      }
+
       // code to find cgpa
       const { semesters, registerNumber } = result;
       const numSemesters = semesters.length;
@@ -23,33 +28,39 @@ async function addCgpaToDB() {
         { registerNumber: registerNumber },
         { $set: { cgpa: cgpa } }
       );
+      
+      // adding aggregation to fix the ordering of semesters ;]
+
+      try {
+        await students_collection
+          .aggregate([
+            { $unwind: "$semesters" },
+            { $sort: { "semesters.semester": 1 } },
+            {
+              $group: {
+                _id: "$_id",
+                registerNumber: { $first: "$registerNumber" },
+                name: { $first: "$name" },
+                cgpa: { $first: "$cgpa" },
+                semesters: { $push: "$semesters" },
+              },
+            },
+            { $out: "student_results" },
+          ])
+          .toArray();
+      } catch (e) {
+        console.error("*** Error in addCgpaDB aggregation ***", e);
+        throw new Error("Error aggregating data");
+      }
     }
 
-    
-    // adding aggregation to fix the ordering of semesters ;]
-    await students_collection
-      .aggregate([
-        { $unwind: "$semesters" },
-        { $sort: { "semesters.semester": 1 } },
-        {
-          $group: {
-            _id: "$_id",
-            registerNumber: { $first: "$registerNumber" },
-            name: { $first: "$name" },
-            cgpa: { $first: "$cgpa" },
-            semesters: { $push: "$semesters" },
-          },
-        },
-        { $out: "student_results" },
-      ])
-      .toArray();
     // gets the data after aggregating ;]
     const sortedData = await students_collection.find().toArray();
-
 
     return sortedData;
   } catch (e) {
     console.error("*** Error in addCgpaDB ***", e);
+    throw new Error("Error adding CGPA to DB");
   } finally {
     await client.close();
   }
