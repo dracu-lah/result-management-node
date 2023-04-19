@@ -5,9 +5,6 @@ async function addCgpaToDB() {
     await client.connect();
     const database = client.db("result_management");
     const students_collection = database.collection("student_results");
-    const final_students_collection = database.collection(
-      "final_student_results"
-    );
 
     const results = await students_collection.find().toArray();
     for (const result of results) {
@@ -34,31 +31,31 @@ async function addCgpaToDB() {
 
       // adding aggregation to fix the ordering of semesters ;]
 
-      try {
-        await students_collection
-          .aggregate([
-            { $unwind: "$semesters" },
-            { $sort: { "semesters.semester": 1 } },
-            {
-              $group: {
-                _id: "$_id",
-                registerNumber: { $first: "$registerNumber" },
-                name: { $first: "$name" },
-                cgpa: { $first: "$cgpa" },
-                semesters: { $push: "$semesters" },
-              },
-            },
-            { $out: "final_student_results" },
-          ])
-          .toArray();
-      } catch (e) {
-        console.error("*** Error in addCgpaDB aggregation ***", e);
-        throw new Error("Error aggregating data");
-      }
+      // try {
+      //   await students_collection
+      //     .aggregate([
+      //       { $unwind: "$semesters" },
+      //       { $sort: { "semesters.semester": 1 } },
+      //       {
+      //         $group: {
+      //           _id: "$_id",
+      //           registerNumber: { $first: "$registerNumber" },
+      //           name: { $first: "$name" },
+      //           cgpa: { $first: "$cgpa" },
+      //           semesters: { $push: "$semesters" },
+      //         },
+      //       },
+      //       { $out: "final_student_results" },
+      //     ])
+      //     .toArray();
+      // } catch (e) {
+      //   console.error("*** Error in addCgpaDB aggregation ***", e);
+      //   throw new Error("Error aggregating data");
+      // }
     }
 
     // gets the data after aggregating ;]
-    const sortedData = await final_students_collection.find().toArray();
+    const sortedData = await students_collection.find().toArray();
 
     return sortedData;
   } catch (e) {
