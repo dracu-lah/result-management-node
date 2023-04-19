@@ -5,6 +5,9 @@ async function addCgpaToDB() {
     await client.connect();
     const database = client.db("result_management");
     const students_collection = database.collection("student_results");
+    const final_students_collection = database.collection(
+      "final_student_results"
+    );
 
     const results = await students_collection.find().toArray();
     for (const result of results) {
@@ -28,7 +31,7 @@ async function addCgpaToDB() {
         { registerNumber: registerNumber },
         { $set: { cgpa: cgpa } }
       );
-      
+
       // adding aggregation to fix the ordering of semesters ;]
 
       try {
@@ -45,7 +48,7 @@ async function addCgpaToDB() {
                 semesters: { $push: "$semesters" },
               },
             },
-            { $out: "student_results" },
+            { $out: "final_student_results" },
           ])
           .toArray();
       } catch (e) {
@@ -55,7 +58,7 @@ async function addCgpaToDB() {
     }
 
     // gets the data after aggregating ;]
-    const sortedData = await students_collection.find().toArray();
+    const sortedData = await final_students_collection.find().toArray();
 
     return sortedData;
   } catch (e) {
