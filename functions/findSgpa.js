@@ -10,7 +10,6 @@ async function findSgpa(students) {
     const credits_collection = database.collection("credits_data");
 
     const credits = await credits_collection.find().toArray();
-
     for (const student of students) {
       let totalCreditPoints = 0;
       let totalGradePoints = 0;
@@ -36,7 +35,7 @@ async function findSgpa(students) {
     }
   } catch (e) {
     console.error("*** Error in findSgpa.js ***: ", e);
-  } finally { 
+  } finally {
     await client.close();
   }
 }

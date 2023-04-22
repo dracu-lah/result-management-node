@@ -11,11 +11,11 @@ app.use(cors());
 app.use(express.json());
 const port = process.env.PORT;
 
-app.post("/", (req, res) => {
+app.post("/", async (req, res) => {
   //   get post data of a student from students data
   const studentsData = req.body.result;
   // calls findSgpa function
-  findSgpa(studentsData);
+  await findSgpa(studentsData);
   res.send("Post sucessfully");
 });
 
