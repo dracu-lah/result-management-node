@@ -9,7 +9,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 
 app.post("/", async (req, res) => {
   //   get post data of a student from students data
